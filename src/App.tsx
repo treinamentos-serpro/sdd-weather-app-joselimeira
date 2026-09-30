@@ -1,79 +1,68 @@
-import { useState } from 'react';
-import type { Unit } from './types/weather';
-import { useWeather } from './hooks/useWeather';
-import SearchBar from './components/SearchBar';
-import UnitToggle from './components/UnitToggle';
+import { useEffect, useRef, useState } from 'react';
 import CurrentWeather from './components/CurrentWeather';
 import ForecastList from './components/ForecastList';
-import LoadingState from './components/states/LoadingState';
-import ErrorState from './components/states/ErrorState';
+import SearchBar from './components/SearchBar';
 import EmptyState from './components/states/EmptyState';
-
-/**
- * WeatherView — aplicação completa de previsão do tempo.
- *
- * Construída ao longo do treinamento de Spec-Driven Development com GitHub
- * Copilot, do briefing à entrega.
- */
+import ErrorState from './components/states/ErrorState';
+import LoadingState from './components/states/LoadingState';
+import UnitToggle from './components/UnitToggle';
+import useWeather from './hooks/useWeather';
+import type { Unit } from './types/weather';
 export default function App() {
-  const { status, data, error, query, search, retry } = useWeather();
+  const weather = useWeather();
   const [unit, setUnit] = useState<Unit>('celsius');
+  const weatherResultsRef = useRef<HTMLElement>(null);
+  const isLoading = weather.status === 'loading';
+
+  useEffect(() => {
+    if (weather.status === 'success') weatherResultsRef.current?.focus();
+  }, [weather.status]);
 
   return (
-    <div className="min-h-screen text-white">
-      <header className="border-b border-white/10">
-        <div className="mx-auto flex max-w-5xl flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2">
-            <span aria-hidden="true" className="text-2xl text-sun">
-              ☀️
-            </span>
-            <span className="text-lg font-bold">WeatherView</span>
+    <main className="app-shell">
+      <header className="mb-8 grid gap-6">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="brand-kicker">WEATHER / NOW</p>
+            <h1>Clima claro para seus planos.</h1>
+            <p>Consulte as condições atuais e os próximos cinco dias.</p>
           </div>
-          <div className="flex items-center gap-3">
-            <SearchBar onSearch={search} disabled={status === 'loading'} />
-            <UnitToggle unit={unit} onChange={setUnit} />
-          </div>
+          <UnitToggle unit={unit} onChange={setUnit} />
         </div>
+        <SearchBar
+          query={weather.query}
+          results={weather.cities}
+          disabled={isLoading}
+          validationMessage={weather.status === 'idle' ? weather.error : null}
+          onQueryChange={weather.setQuery}
+          onSearch={weather.search}
+          onSelect={weather.selectCity}
+        />
       </header>
-
-      <main className="mx-auto max-w-5xl space-y-8 px-4 py-8">
-        {status === 'idle' && (
-          <EmptyState
-            title="Busque uma cidade para começar"
-            hint="Ex.: Seattle, Lisboa, São Paulo…"
-          />
-        )}
-
-        {status === 'loading' && <LoadingState />}
-
-        {status === 'empty' && (
-          <EmptyState
-            title={`Nenhuma cidade encontrada para "${query}"`}
-            hint="Verifique a grafia e tente novamente."
-          />
-        )}
-
-        {status === 'error' && error && <ErrorState message={error} onRetry={retry} />}
-
-        {status === 'success' && data && (
-          <>
-            <CurrentWeather city={data.city} current={data.current} unit={unit} />
-            <ForecastList forecast={data.forecast} unit={unit} />
-          </>
-        )}
-      </main>
-
-      <footer className="py-8 text-center text-sm text-white/40">
-        Dados por{' '}
-        <a
-          href="https://open-meteo.com/"
-          target="_blank"
-          rel="noreferrer"
-          className="text-accent-400 hover:underline"
+      {weather.status === 'idle' && !weather.error && (
+        <div className="welcome" role="status">
+          <p>Digite uma cidade para consultar o clima atual e a previsão.</p>
+        </div>
+      )}
+      {isLoading && <LoadingState message="Carregando dados meteorológicos..." />}
+      {!isLoading && weather.status === 'empty' && <EmptyState />}
+      {!isLoading && weather.status === 'error' && (
+        <ErrorState
+          message={weather.error ?? 'Não foi possível carregar os dados.'}
+          onRetry={weather.retry}
+        />
+      )}
+      {weather.status === 'success' && weather.data && (
+        <section
+          ref={weatherResultsRef}
+          tabIndex={-1}
+          className="weather-content focus:outline-none focus:ring-2 focus:ring-accent-400 focus:ring-offset-4 focus:ring-offset-night-900"
+          aria-label="Condições meteorológicas"
         >
-          Open-Meteo
-        </a>
-      </footer>
-    </div>
+          <CurrentWeather city={weather.data.city} current={weather.data.current} unit={unit} />
+          <ForecastList forecast={weather.data.forecast} unit={unit} />
+        </section>
+      )}
+    </main>
   );
 }
