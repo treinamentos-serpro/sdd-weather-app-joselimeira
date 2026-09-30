@@ -1,44 +1,32 @@
-/**
- * Funções puras de formatação de datas para a previsão.
- */
-
-const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-const MONTHS = [
-  'Jan',
-  'Fev',
-  'Mar',
-  'Abr',
-  'Mai',
-  'Jun',
-  'Jul',
-  'Ago',
-  'Set',
-  'Out',
-  'Nov',
-  'Dez',
-];
-
-/** Faz parse de uma data ISO (YYYY-MM-DD) como data local, sem fuso. */
-function parseLocalDate(iso: string): Date {
-  const [year, month, day] = iso.split('-').map(Number);
-  return new Date(year, (month ?? 1) - 1, day ?? 1);
+export function formatTemperature(value: number, unitSymbol: string): string {
+  return `${new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 }).format(value)}${unitSymbol}`;
 }
 
-/**
- * Rótulo do dia relativo a "hoje":
- * - índice 0 → "Hoje"
- * - índice 1 → "Amanhã"
- * - demais → dia da semana abreviado
- */
-export function getDayLabel(iso: string, index: number): string {
+export function formatDate(date: string): string {
+  const parsed = new Date(`${date}T12:00:00`);
+  return new Intl.DateTimeFormat('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' })
+    .format(parsed).replace('.', '');
+}
+
+export function getDayLabel(index: number, date: string): string {
   if (index === 0) return 'Hoje';
   if (index === 1) return 'Amanhã';
-  const date = parseLocalDate(iso);
-  return WEEKDAYS[date.getDay()];
+  return new Intl.DateTimeFormat('pt-BR', {
+    weekday: 'long',
+    timeZone: 'UTC',
+  }).format(new Date(`${date}T12:00:00Z`));
 }
 
-/** Formata a data como "12 Jun". */
-export function getShortDate(iso: string): string {
-  const date = parseLocalDate(iso);
-  return `${date.getDate()} ${MONTHS[date.getMonth()]}`;
+export function getShortDate(date: string): string {
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'UTC',
+  })
+    .format(new Date(`${date}T12:00:00Z`))
+    .replace('.', '');
+}
+
+export function formatTime(date: string): string {
+  return new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' }).format(new Date(date));
 }

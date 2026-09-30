@@ -1,0 +1,67 @@
+import type { WeatherData } from '../types/weather';
+
+export const mockWeatherData: WeatherData = {
+  city: {
+    id: 3451190,
+    name: 'Rio de Janeiro',
+    country: 'Brasil',
+    admin1: 'Rio de Janeiro',
+    latitude: -22.9068,
+    longitude: -43.1729,
+    timezone: 'America/Sao_Paulo',
+  },
+  current: {
+    time: '2026-09-30T14:00',
+    temperatureCelsius: 24,
+    weatherCode: 2,
+    isDay: true,
+    relativeHumidity: 68,
+    windSpeedKmh: 11.5,
+    precipitationMm: 0,
+    pressureHpa: 1013.2,
+  },
+  forecast: [
+    {
+      date: '2026-09-30',
+      minTemperatureCelsius: 19,
+      maxTemperatureCelsius: 27,
+      weatherCode: 2,
+      precipitationProbability: 10,
+      precipitationMm: 0,
+    },
+    {
+      date: '2026-10-01',
+      minTemperatureCelsius: 20,
+      maxTemperatureCelsius: 28,
+      weatherCode: 1,
+      precipitationProbability: 5,
+      precipitationMm: 0,
+    },
+    {
+      date: '2026-10-02',
+      minTemperatureCelsius: 21,
+      maxTemperatureCelsius: 29,
+      weatherCode: 3,
+      precipitationProbability: 20,
+      precipitationMm: 0.4,
+    },
+    {
+      date: '2026-10-03',
+      minTemperatureCelsius: 20,
+      maxTemperatureCelsius: 26,
+      weatherCode: 61,
+      precipitationProbability: 65,
+      precipitationMm: 4.2,
+    },
+    {
+      date: '2026-10-04',
+      minTemperatureCelsius: 19,
+      maxTemperatureCelsius: 25,
+      weatherCode: 1,
+      precipitationProbability: 10,
+      precipitationMm: 0,
+    },
+  ],
+  timezone: 'America/Sao_Paulo',
+  fetchedAt: '2026-09-30T17:00:00.000Z',
+};
